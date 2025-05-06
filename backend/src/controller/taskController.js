@@ -1,4 +1,5 @@
 const Task = require("../model/taskModel");
+const taskService = require("../services/taskService");
 const createTask = async (req, res) => {
 	const {
 		title,
@@ -10,25 +11,15 @@ const createTask = async (req, res) => {
 		assignedTo,
 	} = req.body;
 	try {
-		if (
-			!title ||
-			!dueDate ||
-			!priority ||
-			!status ||
-			!createdBy ||
-			!assignedTo
-		) {
-			return res.status(400).json({ message: "All fields are required" });
-		}
-		const task = await Task.create({
+		const task = await taskService.createTask(
 			title,
 			description,
+			status,
 			dueDate,
 			priority,
-			status,
 			createdBy,
-			assignedTo,
-		});
+			assignedTo
+		);
 		return res.status(201).json({
 			success: true,
 			message: "Task created successfully",
@@ -36,6 +27,9 @@ const createTask = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
+		if (error.message === "All fields are required") {
+			return res.status(400).json({ message: error.message });
+		}
 		return res.status(500).json({
 			success: false,
 			message: "Failed to create task",
@@ -46,13 +40,16 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
 	try {
-		const tasks = await Task.find();
+		const tasks = await taskService.getTasks();
 		return res.status(200).json({
 			success: true,
 			tasks,
 		});
 	} catch (error) {
 		console.error(error);
+		if (error.message === "No tasks found") {
+			return res.status(404).json({ message: error.message });
+		}
 		return res.status(500).json({
 			success: false,
 			message: "Failed to retrieve tasks",
@@ -64,19 +61,16 @@ const getTasks = async (req, res) => {
 const getTaskById = async (req, res) => {
 	const { id } = req.params;
 	try {
-		const task = await Task.findById(id);
-		if (!task) {
-			return res.status(404).json({
-				success: false,
-				message: "Task not found",
-			});
-		}
+		const task = await taskService.getTaskById(id);
 		return res.status(200).json({
 			success: true,
 			task,
 		});
 	} catch (error) {
 		console.error(error);
+        if (error.message === "Task not found") {
+            return res.status(404).json({ message: error.message });
+        }
 		return res.status(500).json({
 			success: false,
 			message: "Failed to retrieve task",
@@ -97,26 +91,16 @@ const updateTask = async (req, res) => {
 		assignedTo,
 	} = req.body;
 	try {
-		const task = await Task.findByIdAndUpdate(
-			id,
-			{
-				title,
-				description,
-				dueDate,
-				priority,
-				status,
-				createdBy,
-				assignedTo,
-			},
-			{ new: true, runValidators: true }
-		);
-
-		if (!task) {
-			return res.status(404).json({
-				success: false,
-				message: "Task not found",
-			});
-		}
+		const task = await taskService.updateTask(
+            id,
+            title,
+            description,
+            dueDate,
+            priority,
+            status,
+            createdBy,
+            assignedTo
+        );
 
 		return res.status(200).json({
 			success: true,
@@ -125,6 +109,9 @@ const updateTask = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
+        if (error.message === "Task not found") {
+            return res.status(404).json({ message: error.message });
+        }
 		return res.status(500).json({
 			success: false,
 			message: "Failed to update task",
@@ -136,19 +123,20 @@ const updateTask = async (req, res) => {
 const deleteTask = async (req, res) => {
 	const { id } = req.params;
 	try {
-		const task = await Task.findByIdAndDelete(id);
-		if (!task) {
-			return res.status(404).json({
-				success: false,
-				message: "Task not found",
-			});
-		}
+		const task = await taskService.deleteTask(id);
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+
 		return res.status(200).json({
 			success: true,
 			message: "Task deleted successfully",
 		});
 	} catch (error) {
 		console.error(error);
+        if (error.message === "Task not found") {
+            return res.status(404).json({ message: error.message });
+        }
 		return res.status(500).json({
 			success: false,
 			message: "Failed to delete task",
@@ -162,5 +150,5 @@ module.exports = {
 	getTasks,
 	getTaskById,
 	updateTask,
-    deleteTask
+	deleteTask,
 };

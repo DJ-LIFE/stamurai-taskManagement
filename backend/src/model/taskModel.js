@@ -18,6 +18,11 @@ const tasKSchema = new mongoose.Schema({
         enum: ["low", "medium", "high"],
         default: "low",
     },
+    status: {
+        type: String,
+        enum: ["not started", "in progress", "completed"],
+        default: "not started",
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
