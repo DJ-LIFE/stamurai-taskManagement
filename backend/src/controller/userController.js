@@ -46,6 +46,7 @@ const signin = async (req, res) => {
 			message: "User signed in successfully",
 			token,
 		});
+		console.log("User signed in successfully", token);
 	} catch (error) {
 		console.error(error);
 		if (
