@@ -50,6 +50,12 @@ class UserService {
 			expiresIn: "1h",
 		});
 	}
+
+	async getAllUsers() {
+		// Get all users but exclude the password field
+		const users = await User.find({}).select("-password");
+		return users;
+	}
 }
 
 module.exports = new UserService();

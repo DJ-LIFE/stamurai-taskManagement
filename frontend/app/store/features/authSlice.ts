@@ -2,7 +2,7 @@ import { authService } from "@/app/services/api";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 type User = {
-	id: string;
+	_id: string;
 	email: string;
 	password: string;
 };
@@ -14,6 +14,20 @@ interface AuthState {
 	isLoading: boolean;
 	error: string | null;
 }
+
+// Helper function to get user ID directly
+export const getUserId = (): string | null => {
+	try {
+		const authStore = localStorage.getItem("authStore");
+		if (!authStore) return null;
+
+		const parsedStore = JSON.parse(authStore);
+		return parsedStore.user?._id || null;
+	} catch (e) {
+		console.error("Error retrieving user ID from localStorage", e);
+		return null;
+	}
+};
 
 const loadState = (): AuthState => {
 	try {
@@ -27,7 +41,12 @@ const loadState = (): AuthState => {
 				error: null,
 			};
 
-		return JSON.parse(authStore);
+		const parsedStore = JSON.parse(authStore);
+
+		if (parsedStore.user && !parsedStore.user._id) {
+			parsedStore.user._id = "";
+		}
+		return parsedStore;
 	} catch (e) {
 		console.error("Error loading auth state from localStorage", e);
 		return {

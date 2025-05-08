@@ -5,7 +5,8 @@ const Home = () => {
 	return (
 		<AuthGuard>
 			<div className="flex justify-center items-center h-screen text-2xl">
-				Welcome To Home
+				<div>DashBoard</div>
+				<div>Create Task</div>
 			</div>
 		</AuthGuard>
 	);

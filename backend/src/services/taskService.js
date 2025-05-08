@@ -82,6 +82,7 @@ class TaskService {
 		if (!task) {
 			throw new Error("Task not found");
 		}
+		return task; // Return the updated task
 	}
 
 	async deleteTask(id) {
